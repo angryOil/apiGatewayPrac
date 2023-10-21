@@ -16,8 +16,6 @@ func main() {
 	http.ListenAndServe(":8080", r)
 }
 
-var loginUrl = "http://localhost:8081/users/login"
-
 func newHandler() http.Handler {
 	r := mux.NewRouter()
 	// jwt 관련
@@ -30,6 +28,7 @@ func newHandler() http.Handler {
 	uh := getUserHandler(p)
 	handler.NewDecoHandler(uh, checkFunc)
 	r.PathPrefix("/users").Handler(uh)
+
 	return r
 }
 
@@ -39,5 +38,8 @@ func getTokenCheckFunc(p jwt.Provider) func(http.ResponseWriter, *http.Request, 
 }
 
 func getUserHandler(p jwt.Provider) http.Handler {
-	return user.NewHandler(user2.NewController(user3.NewService(p, req.NewRequester(loginUrl))))
+	var loginUrl = "http://localhost:8081/users/login"
+	var userCreateUrl = "http://localhost:8081/users"
+
+	return user.NewHandler(user2.NewController(user3.NewService(p, req.NewRequester(loginUrl, userCreateUrl))))
 }

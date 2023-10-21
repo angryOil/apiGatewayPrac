@@ -33,7 +33,6 @@ func (p Provider) CreateToken(u domain.User) (string, error) {
 			ExpiresAt: jwt.At(time.Now().Add(time.Minute * 30)),
 		},
 	}
-	fmt.Println("se", p.secretKey)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &at)
 	signedAuthToken, err := token.SignedString([]byte(p.secretKey))
 	return signedAuthToken, err
