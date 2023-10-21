@@ -19,3 +19,9 @@ func (c Controller) Login(ctx context.Context, u req.LoginDto) (string, error) {
 	token, err := c.s.Login(ctx, du)
 	return token, err
 }
+
+func (c Controller) CreateUser(ctx context.Context, cd req.CreateDto) error {
+	u := cd.ToDomain()
+	err := c.s.CreateUser(ctx, u)
+	return err
+}
