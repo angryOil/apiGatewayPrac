@@ -1,6 +1,7 @@
 package main
 
 import (
+	handler2 "apiGateway/cmd/app/handler"
 	"apiGateway/cmd/app/handler/user"
 	user2 "apiGateway/controller/user"
 	"apiGateway/deco/handler"
@@ -26,9 +27,13 @@ func newHandler() http.Handler {
 
 	// user 관련
 	uh := getUserHandler(p)
-	handler.NewDecoHandler(uh, checkFunc)
 	r.PathPrefix("/users").Handler(uh)
 
+	// test 입니다
+	t := handler2.NewTestHandler()
+
+	wrappedTest := handler.NewDecoHandler(t, checkFunc)
+	r.PathPrefix("/test").Handler(wrappedTest)
 	return r
 }
 
