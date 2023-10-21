@@ -63,3 +63,8 @@ func payloadToDomain(payload string) (domain.User, error) {
 	}
 	return u, nil
 }
+
+func (s Service) CreateUser(ctx context.Context, u domain.User) error {
+	err := s.ur.CreateUser(ctx, u)
+	return err
+}
