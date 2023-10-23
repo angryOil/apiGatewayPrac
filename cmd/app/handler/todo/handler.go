@@ -60,6 +60,37 @@ func (h Handler) getTodoList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) getTodoDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	todoId, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	if todoId == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("todoId 가 없습니다."))
+		return
+	}
+	resDto, err := h.c.GetTodoDetail(r.Context(), todoId)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(resDto)
+	if err != nil {
+		log.Println("marshal err: ", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(data))
 }
 
 func (h Handler) createTodo(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +114,7 @@ func (h Handler) createTodo(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("success"))
 }

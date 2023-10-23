@@ -97,6 +97,48 @@ func (r TodoRequester) GetTodoList(ctx context.Context, reqPage page.ReqPage) ([
 	return results.Contents, results.TotalCnt, nil
 }
 
+func (r TodoRequester) GetTodoDetail(ctx context.Context, id int) (domain.Todo, error) {
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return domain.Todo{}, errors.New("invalid token")
+	}
+	re, err := http.NewRequest("GET", fmt.Sprintf("%s/%d", r.todoUrl, id), nil)
+	if err != nil {
+		log.Println("make NewRequest err: ", err)
+		return domain.Todo{}, errors.New("internal server error")
+	}
+	re.Header.Add("token", token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("request defaultClient do err: ", err)
+		return domain.Todo{}, errors.New("internal server error")
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return domain.Todo{}, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		readBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("read todoResponse err: ", err)
+			return domain.Todo{}, errors.New("internal server error")
+		}
+		log.Println("response is not ok or nonFound", string(readBody))
+		return domain.Todo{}, errors.New("internal server error")
+	}
+
+	var result domain.Todo
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		log.Println("todo json decode err: ", err)
+		return domain.Todo{}, errors.New("internal server error")
+	}
+	return result, nil
+}
+
 type listResDto struct {
 	Contents []domain.Todo `json:"contents"`
 	TotalCnt int           `json:"total_content"`

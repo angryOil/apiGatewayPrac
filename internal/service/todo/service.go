@@ -23,3 +23,8 @@ func (s Service) CreateTodo(ctx context.Context, td domain.Todo) error {
 func (s Service) GetTodoList(ctx context.Context, reqPage page2.ReqPage) ([]domain.Todo, int, error) {
 	return s.tr.GetTodoList(ctx, reqPage)
 }
+
+func (s Service) GetTodoDetail(ctx context.Context, id int) (domain.Todo, error) {
+	resTodoDomain, err := s.tr.GetTodoDetail(ctx, id)
+	return resTodoDomain, err
+}
