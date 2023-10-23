@@ -26,6 +26,11 @@ func (a AuthMiddleware) CheckToken(w http.ResponseWriter, r *http.Request, h htt
 
 	result, err := a.p.ValidToken(token)
 	if err != nil {
+		if strings.Contains(err.Error(), "invalid") || strings.Contains(err.Error(), "expired") {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(err.Error()))
+			return
+		}
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("internal server err"))
