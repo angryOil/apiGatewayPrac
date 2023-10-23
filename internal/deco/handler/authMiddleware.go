@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"apiGateway/jwt"
+	"apiGateway/internal/jwt"
 	"context"
 	"log"
 	"net/http"

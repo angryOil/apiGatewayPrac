@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"apiGateway/service/common"
+	"apiGateway/internal/service/common"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"

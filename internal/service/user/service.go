@@ -1,9 +1,9 @@
 package user
 
 import (
-	"apiGateway/domain"
-	"apiGateway/jwt"
-	"apiGateway/service/user/req"
+	"apiGateway/internal/cli"
+	"apiGateway/internal/domain"
+	"apiGateway/internal/jwt"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -14,10 +14,10 @@ import (
 
 type Service struct {
 	p  jwt.Provider
-	ur req.UserRequester
+	ur cli.UserRequester
 }
 
-func NewService(p jwt.Provider, ur req.UserRequester) Service {
+func NewService(p jwt.Provider, ur cli.UserRequester) Service {
 	return Service{p: p, ur: ur}
 }
 

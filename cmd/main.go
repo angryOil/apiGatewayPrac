@@ -1,13 +1,15 @@
 package main
 
 import (
-	handler2 "apiGateway/cmd/app/handler"
+	"apiGateway/cmd/app/handler/todo"
 	"apiGateway/cmd/app/handler/user"
-	user2 "apiGateway/controller/user"
-	"apiGateway/deco/handler"
-	"apiGateway/jwt"
-	user3 "apiGateway/service/user"
-	"apiGateway/service/user/req"
+	"apiGateway/internal/cli"
+	todo2 "apiGateway/internal/controller/todo"
+	user2 "apiGateway/internal/controller/user"
+	handler3 "apiGateway/internal/deco/handler"
+	"apiGateway/internal/jwt"
+	todo3 "apiGateway/internal/service/todo"
+	user3 "apiGateway/internal/service/user"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -29,16 +31,16 @@ func newHandler() http.Handler {
 	uh := getUserHandler(p)
 	r.PathPrefix("/users").Handler(uh)
 
-	// test 입니다
-	t := handler2.NewTestHandler()
+	// todos 관련
+	th := getTodoHandler()
+	wrappedTodoHandler := handler3.NewDecoHandler(th, checkFunc)
+	r.PathPrefix("/todos").Handler(wrappedTodoHandler)
 
-	wrappedTest := handler.NewDecoHandler(t, checkFunc)
-	r.PathPrefix("/test").Handler(wrappedTest)
 	return r
 }
 
 func getTokenCheckFunc(p jwt.Provider) func(http.ResponseWriter, *http.Request, http.Handler) {
-	am := handler.NewAuthMiddleware(p)
+	am := handler3.NewAuthMiddleware(p)
 	return am.CheckToken
 }
 
@@ -46,5 +48,10 @@ func getUserHandler(p jwt.Provider) http.Handler {
 	var loginUrl = "http://localhost:8081/users/login"
 	var userCreateUrl = "http://localhost:8081/users"
 
-	return user.NewHandler(user2.NewController(user3.NewService(p, req.NewRequester(loginUrl, userCreateUrl))))
+	return user.NewHandler(user2.NewController(user3.NewService(p, cli.NewUserRequester(loginUrl, userCreateUrl))))
+}
+
+func getTodoHandler() http.Handler {
+	var todoUrl = "http://localhost:8082/todos"
+	return todo.NewHandler(todo2.NewController(todo3.NewService(cli.NewTodoRequester(todoUrl))))
 }

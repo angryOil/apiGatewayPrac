@@ -8,11 +8,11 @@ import (
 )
 
 type User struct {
-	Id        int
-	Email     string
-	Password  string
-	Role      []string
-	CreatedAt time.Time
+	Id        int       `json:"user_id"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	Role      []string  `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func CreateUser(email string, password string, role []string) (User, error) {

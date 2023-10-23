@@ -1,8 +1,8 @@
 package user
 
 import (
-	"apiGateway/controller/user"
-	"apiGateway/controller/user/req"
+	"apiGateway/internal/controller/user"
+	"apiGateway/internal/controller/user/req"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"log"
