@@ -23,7 +23,7 @@ func NewHandler(c todo.Controller) http.Handler {
 	m.HandleFunc("/todos", h.getTodoList).Methods(http.MethodGet)
 	m.HandleFunc("/todos/{id:[0-9]+}", h.getTodoDetail).Methods(http.MethodGet)
 	m.HandleFunc("/todos", h.createTodo).Methods(http.MethodPost)
-	m.HandleFunc("/todos", h.updateTodo).Methods(http.MethodPut)
+	m.HandleFunc("/todos/{id:[0-9]+}", h.updateTodo).Methods(http.MethodPut)
 	m.HandleFunc("/todos/{id:[0-9]+}", h.deleteTodo).Methods(http.MethodDelete)
 	return m
 }
@@ -97,7 +97,7 @@ func (h Handler) createTodo(w http.ResponseWriter, r *http.Request) {
 	ct := req.CreateTodoDto{}
 	err := json.NewDecoder(r.Body).Decode(&ct)
 	if err != nil {
-		log.Println("createTodo decode fail", err)
+		log.Println("createTodo decode fail: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("잘못된값으로 요청했습니다."))
 		return
@@ -120,9 +120,51 @@ func (h Handler) createTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) updateTodo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	todoId, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
+	ut := req.UpdateTodoDto{}
+	err = json.NewDecoder(r.Body).Decode(&ut)
+	if err != nil {
+		log.Println("updateTodo decode fail: ", err)
+		http.Error(w, "잘못된 값으로 요청했습니다.", http.StatusBadRequest)
+		return
+	}
+
+	err = h.c.UpdateTodo(r.Context(), ut, todoId)
+	if err != nil {
+		if !strings.Contains(err.Error(), "internal") {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
 }
 
 func (h Handler) deleteTodo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	todoId, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
+	err = h.c.DeleteTodo(r.Context(), todoId)
+
+	if err != nil {
+		if !strings.Contains(err.Error(), "internal") {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "server internal error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	return
 }

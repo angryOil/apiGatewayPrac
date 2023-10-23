@@ -139,6 +139,85 @@ func (r TodoRequester) GetTodoDetail(ctx context.Context, id int) (domain.Todo, 
 	return result, nil
 }
 
+func (r TodoRequester) UpdateTodo(ctx context.Context, td domain.Todo) error {
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return errors.New("invalid token")
+	}
+
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(td)
+	if err != nil {
+		log.Println("update todo json encode err: ", err)
+		return errors.New("internal server error")
+	}
+
+	re, err := http.NewRequest("PUT", fmt.Sprintf("%s", r.todoUrl), &buf)
+	if err != nil {
+		log.Println("make newRequest err: ", err)
+		return errors.New("internal server error")
+	}
+
+	re.Header.Add("token", token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("update todo client do fail:", err)
+		return errors.New("internal server error")
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		readBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("res update readBody fail: ", err)
+			return errors.New("internal server error")
+		}
+		if resp.StatusCode == http.StatusBadRequest {
+			return errors.New(string(readBody))
+		}
+		log.Println("update todo not ok, not badRequest response is: ", string(readBody))
+		return errors.New("internal server error")
+	}
+	return nil
+}
+
+func (r TodoRequester) DeleteTodo(ctx context.Context, id int) error {
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return errors.New("invalid token")
+	}
+
+	re, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%d", r.todoUrl, id), nil)
+	if err != nil {
+		log.Println("delete todo make request fail:", err)
+		return errors.New("server internal error")
+	}
+	re.Header.Add("token", token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("delete todo client do fail:", err)
+		return errors.New("server internal error")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		readBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("delete response readBody fail: ", err)
+			return errors.New("internal server error")
+		}
+		if resp.StatusCode == http.StatusBadRequest {
+			return errors.New(string(readBody))
+		}
+		log.Println("delete todo response statusCode is not ok,badRequest", string(readBody))
+		return errors.New("internal server error")
+	}
+
+	return nil
+}
+
 type listResDto struct {
 	Contents []domain.Todo `json:"contents"`
 	TotalCnt int           `json:"total_content"`

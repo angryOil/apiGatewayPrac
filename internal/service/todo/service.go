@@ -28,3 +28,13 @@ func (s Service) GetTodoDetail(ctx context.Context, id int) (domain.Todo, error)
 	resTodoDomain, err := s.tr.GetTodoDetail(ctx, id)
 	return resTodoDomain, err
 }
+
+func (s Service) UpdateTodo(ctx context.Context, td domain.Todo) error {
+	err := s.tr.UpdateTodo(ctx, td)
+	return err
+}
+
+func (s Service) DeleteTodo(ctx context.Context, id int) error {
+	err := s.tr.DeleteTodo(ctx, id)
+	return err
+}

@@ -36,3 +36,14 @@ func (c Controller) GetTodoDetail(ctx context.Context, id int) (res.DetailDto, e
 	resDto := res.ToDetailDto(resultTodo)
 	return resDto, err
 }
+
+func (c Controller) UpdateTodo(ctx context.Context, ut req.UpdateTodoDto, todoId int) error {
+	td := ut.ToDomain(todoId)
+	err := c.s.UpdateTodo(ctx, td)
+	return err
+}
+
+func (c Controller) DeleteTodo(ctx context.Context, todoId int) error {
+	err := c.s.DeleteTodo(ctx, todoId)
+	return err
+}

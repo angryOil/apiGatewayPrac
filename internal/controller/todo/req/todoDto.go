@@ -20,17 +20,15 @@ func (d CreateTodoDto) ToDomain() domain.Todo {
 }
 
 type UpdateTodoDto struct {
-	Id        int    `json:"id" example:"0"`
 	Title     string `json:"title" example:"제목"`
 	Content   string `json:"content" example:"내용"`
 	OrderNum  int    `json:"order_num" example:"1"`
-	IsDeleted bool   `json:"is_deleted" example:"false"`
+	IsDeleted bool   `json:"is_done" example:"false"`
 }
 
-func (d UpdateTodoDto) ToDomain(userId int) domain.Todo {
+func (d UpdateTodoDto) ToDomain(todoId int) domain.Todo {
 	return domain.Todo{
-		Id:            d.Id,
-		UserId:        userId,
+		Id:            todoId,
 		Title:         d.Title,
 		Content:       d.Content,
 		OrderNum:      d.OrderNum,
