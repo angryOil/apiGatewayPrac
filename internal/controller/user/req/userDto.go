@@ -1,7 +1,7 @@
 package req
 
 import (
-	"apiGateway/domain"
+	"apiGateway/internal/domain"
 )
 
 type CreateDto struct {

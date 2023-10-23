@@ -1,8 +1,8 @@
 package user
 
 import (
-	"apiGateway/controller/user/req"
-	"apiGateway/service/user"
+	"apiGateway/internal/controller/user/req"
+	"apiGateway/internal/service/user"
 	"context"
 )
 
