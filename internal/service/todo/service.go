@@ -10,10 +10,11 @@ type Service struct {
 	tr cli.TodoRequester
 }
 
-func NewService() Service {
-	return Service{}
+func NewService(tr cli.TodoRequester) Service {
+	return Service{tr: tr}
 }
 
 func (s Service) CreateTodo(ctx context.Context, td domain.Todo) error {
-	return nil
+	err := s.tr.CreateTodo(ctx, td)
+	return err
 }

@@ -6,14 +6,14 @@ import (
 )
 
 type Todo struct {
-	Id            int
-	UserId        int
-	Title         string
-	Content       string
-	OrderNum      int
-	IsDeleted     bool
-	CreatedAt     time.Time
-	LastUpdatedAt time.Time
+	Id            int       `json:"id"`
+	UserId        int       `json:"user_id"`
+	Title         string    `json:"title"`
+	Content       string    `json:"content"`
+	OrderNum      int       `json:"order_num"`
+	IsDeleted     bool      `json:"is_deleted"`
+	CreatedAt     time.Time `json:"created_at"`
+	LastUpdatedAt time.Time `json:"lastUpdated_at"`
 }
 
 func CreatedTodo(userId int, title, content string, orderNum int) (Todo, error) {
