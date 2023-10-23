@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"apiGateway/domain"
+	"apiGateway/internal/domain"
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go/v4"

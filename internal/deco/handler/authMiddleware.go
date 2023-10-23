@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"apiGateway/jwt"
+	"apiGateway/internal/jwt"
+	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -35,7 +36,10 @@ func (a AuthMiddleware) CheckToken(w http.ResponseWriter, r *http.Request, h htt
 		w.Write([]byte(err.Error()))
 		return
 	}
-	h.ServeHTTP(w, r)
+
+	// ctx 에 token 추가
+	ctx := ContextWithToken(r.Context(), token)
+	h.ServeHTTP(w, r.WithContext(ctx))
 }
 
 func tokenCheck(token string) bool {
@@ -47,4 +51,8 @@ func tokenCheck(token string) bool {
 		return false
 	}
 	return true
+}
+
+func ContextWithToken(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, "token", token)
 }

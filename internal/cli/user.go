@@ -1,7 +1,7 @@
-package req
+package cli
 
 import (
-	"apiGateway/domain"
+	"apiGateway/internal/domain"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -16,7 +16,7 @@ type UserRequester struct {
 	userCreateUrl string
 }
 
-func NewRequester(loginUrl string, createUrl string) UserRequester {
+func NewUserRequester(loginUrl string, createUrl string) UserRequester {
 	return UserRequester{loginUrl: loginUrl, userCreateUrl: createUrl}
 }
 
