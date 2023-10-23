@@ -14,18 +14,6 @@ api gateway 입니다.
 
 인가서비스를 가지고 있고 나머지 서비스와 통신합니다 
 
-
-### makefile
-
-```shell
-# local postgres run (docker-compose)
-make local-db
-# local postgres migrate init
-make local-init
-# local postgres apply migrate
-make local-migrate
-```
-
 # swagger 설정 [출처](https://www.soberkoder.com/swagger-go-api-swaggo/)
 
 ## dev 설정
