@@ -1,8 +1,8 @@
 package res
 
 import (
+	"apiGateway/internal/domain"
 	"time"
-	"todoList/domain"
 )
 
 type ListDto struct {

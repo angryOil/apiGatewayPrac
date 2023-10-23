@@ -3,10 +3,12 @@ package todo
 import (
 	"apiGateway/internal/controller/todo"
 	"apiGateway/internal/controller/todo/req"
+	page2 "apiGateway/internal/page"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -27,10 +29,37 @@ func NewHandler(c todo.Controller) http.Handler {
 }
 
 func (h Handler) getTodoList(w http.ResponseWriter, r *http.Request) {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 0
+	}
+	size, err := strconv.Atoi(r.URL.Query().Get("size"))
+	if err != nil {
+		size = 0
+	}
+	pReq := page2.NewReqPage(page, size)
+	result, err := h.c.GetTodoList(r.Context(), pReq)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(result)
+	if err != nil {
+		log.Println("json marshal err: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func (h Handler) getTodoDetail(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (h Handler) createTodo(w http.ResponseWriter, r *http.Request) {
