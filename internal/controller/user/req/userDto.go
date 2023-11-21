@@ -1,7 +1,7 @@
 package req
 
 import (
-	"apiGateway/internal/domain"
+	"apiGateway/internal/domain/user"
 )
 
 type CreateDto struct {
@@ -9,12 +9,12 @@ type CreateDto struct {
 	Password string `json:"password"`
 }
 
-func (cd CreateDto) ToDomain() domain.User {
-	return domain.User{
-		Email:    cd.Email,
-		Password: cd.Password,
-		Role:     []string{"USER"},
-	}
+func (cd CreateDto) ToDomain() user.User {
+	return user.NewBuilder().
+		Email(cd.Email).
+		Password(cd.Password).
+		Role([]string{"user"}).
+		Build()
 }
 
 type LoginDto struct {
@@ -22,9 +22,9 @@ type LoginDto struct {
 	Password string `json:"password"`
 }
 
-func (ld LoginDto) ToDomain() domain.User {
-	return domain.User{
-		Email:    ld.Email,
-		Password: ld.Password,
-	}
+func (ld LoginDto) ToDomain() user.User {
+	return user.NewBuilder().
+		Email(ld.Email).
+		Password(ld.Password).
+		Build()
 }
