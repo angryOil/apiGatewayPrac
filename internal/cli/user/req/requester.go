@@ -1,7 +1,6 @@
-package cli
+package req
 
 import (
-	"apiGateway/internal/cli/user/req"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -25,7 +24,7 @@ const (
 	LoginFail           = "login fail"
 )
 
-func (ur UserRequester) Login(cxt context.Context, l req.Login) (string, error) {
+func (ur UserRequester) Login(cxt context.Context, l Login) (string, error) {
 	dto := l.ToLoginDto()
 	data, err := json.Marshal(dto)
 	if err != nil {
@@ -50,7 +49,7 @@ func (ur UserRequester) Login(cxt context.Context, l req.Login) (string, error) 
 	return string(readBody), nil
 }
 
-func (ur UserRequester) CreateUser(ctx context.Context, c req.CreateUser) error {
+func (ur UserRequester) CreateUser(ctx context.Context, c CreateUser) error {
 	dto := c.ToCreateUserDto()
 	data, err := json.Marshal(dto)
 	if err != nil {

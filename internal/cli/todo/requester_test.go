@@ -1,4 +1,4 @@
-package cli
+package todo
 
 import (
 	"encoding/json"

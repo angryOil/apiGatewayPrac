@@ -1,17 +1,17 @@
 package todo
 
 import (
-	"apiGateway/internal/cli"
+	"apiGateway/internal/cli/todo"
 	"apiGateway/internal/domain"
 	page2 "apiGateway/internal/page"
 	"context"
 )
 
 type Service struct {
-	tr cli.TodoRequester
+	tr todo.TodoRequester
 }
 
-func NewService(tr cli.TodoRequester) Service {
+func NewService(tr todo.TodoRequester) Service {
 	return Service{tr: tr}
 }
 
