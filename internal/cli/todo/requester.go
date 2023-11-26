@@ -1,7 +1,7 @@
 package todo
 
 import (
-	"apiGateway/internal/domain"
+	"apiGateway/internal/domain/todo"
 	"apiGateway/internal/page"
 	"apiGateway/internal/service/common"
 	"bytes"
@@ -22,7 +22,7 @@ func NewTodoRequester(todoUrl string) TodoRequester {
 	return TodoRequester{todoUrl: todoUrl}
 }
 
-func (r TodoRequester) CreateTodo(ctx context.Context, td domain.Todo) error {
+func (r TodoRequester) CreateTodo(ctx context.Context, td todo.Todo) error {
 	var buf bytes.Buffer
 	err := json.NewEncoder(&buf).Encode(td)
 	if err != nil {
@@ -61,22 +61,22 @@ func (r TodoRequester) CreateTodo(ctx context.Context, td domain.Todo) error {
 	return nil
 }
 
-func (r TodoRequester) GetTodoList(ctx context.Context, reqPage page.ReqPage) ([]domain.Todo, int, error) {
+func (r TodoRequester) GetTodoList(ctx context.Context, reqPage page.ReqPage) ([]todo.Todo, int, error) {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
-		return []domain.Todo{}, 0, errors.New("invalid token")
+		return []todo.Todo{}, 0, errors.New("invalid token")
 	}
 	re, err := http.NewRequest("GET", fmt.Sprintf("%s?page=%d&size=%d", r.todoUrl, reqPage.Page, reqPage.Size), nil)
 	if err != nil {
 		log.Println("requestMake err: " + err.Error())
-		return []domain.Todo{}, 0, errors.New("internal server error")
+		return []todo.Todo{}, 0, errors.New("internal server error")
 	}
 	re.Header.Add("token", token)
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
 		log.Println("request err: ", err)
-		return []domain.Todo{}, 0, errors.New("internal server error")
+		return []todo.Todo{}, 0, errors.New("internal server error")
 	}
 	defer resp.Body.Close()
 
@@ -86,60 +86,60 @@ func (r TodoRequester) GetTodoList(ctx context.Context, reqPage page.ReqPage) ([
 			log.Println("readBody err", err)
 		}
 		log.Println("getTodoListNotOk:", readBody)
-		return []domain.Todo{}, 0, errors.New("todo server error")
+		return []todo.Todo{}, 0, errors.New("todo server error")
 	}
 	var results listResDto
 	err = json.NewDecoder(resp.Body).Decode(&results)
 	if err != nil {
 		log.Println("json decode err: ", err)
-		return []domain.Todo{}, 0, errors.New("internal server error")
+		return []todo.Todo{}, 0, errors.New("internal server error")
 	}
 	return results.Contents, results.TotalCnt, nil
 }
 
-func (r TodoRequester) GetTodoDetail(ctx context.Context, id int) (domain.Todo, error) {
+func (r TodoRequester) GetTodoDetail(ctx context.Context, id int) (todo.Todo, error) {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
-		return domain.Todo{}, errors.New("invalid token")
+		return todo.Todo{}, errors.New("invalid token")
 	}
 	re, err := http.NewRequest("GET", fmt.Sprintf("%s/%d", r.todoUrl, id), nil)
 	if err != nil {
 		log.Println("make NewRequest err: ", err)
-		return domain.Todo{}, errors.New("internal server error")
+		return todo.Todo{}, errors.New("internal server error")
 	}
 	re.Header.Add("token", token)
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
 		log.Println("request defaultClient do err: ", err)
-		return domain.Todo{}, errors.New("internal server error")
+		return todo.Todo{}, errors.New("internal server error")
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return domain.Todo{}, nil
+		return todo.Todo{}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		readBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("read todoResponse err: ", err)
-			return domain.Todo{}, errors.New("internal server error")
+			return todo.Todo{}, errors.New("internal server error")
 		}
 		log.Println("response is not ok or nonFound", string(readBody))
-		return domain.Todo{}, errors.New("internal server error")
+		return todo.Todo{}, errors.New("internal server error")
 	}
 
-	var result domain.Todo
+	var result todo.Todo
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
 		log.Println("todo json decode err: ", err)
-		return domain.Todo{}, errors.New("internal server error")
+		return todo.Todo{}, errors.New("internal server error")
 	}
 	return result, nil
 }
 
-func (r TodoRequester) UpdateTodo(ctx context.Context, td domain.Todo) error {
+func (r TodoRequester) UpdateTodo(ctx context.Context, td todo.Todo) error {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
 		return errors.New("invalid token")
@@ -219,6 +219,6 @@ func (r TodoRequester) DeleteTodo(ctx context.Context, id int) error {
 }
 
 type listResDto struct {
-	Contents []domain.Todo `json:"contents"`
-	TotalCnt int           `json:"total_content"`
+	Contents []todo.Todo `json:"contents"`
+	TotalCnt int         `json:"total_content"`
 }

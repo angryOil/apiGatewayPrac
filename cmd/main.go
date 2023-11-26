@@ -20,39 +20,46 @@ import (
 )
 
 func main() {
-	r := mux.NewRouter()
-	cafeH := getCafeHandler()
-	r.PathPrefix("/cafes").Handler(cafeH)
+	r := getHandler()
 	http.ListenAndServe(":8080", r)
 }
 
-func getCafeHandler() http.Handler {
-	return cafe.NewHandler(cafe2.NewController(cafe3.NewService(cafe4.NewRequester())))
-}
-
-func newHandler() http.Handler {
+func getHandler() http.Handler {
 	r := mux.NewRouter()
 	// jwt 관련
 	p := jwt.NewProvider("this_is_my_jwt_token_secret_key")
 
 	// token 검사 func
-	checkFunc := getTokenCheckFunc(p)
-
+	//checkFunc := getTokenCheckFunc(p)
 	// user 관련
 	uh := getUserHandler(p)
 	r.PathPrefix("/users").Handler(uh)
 
+	s := r.PathPrefix("/").Subrouter()
+	s.Use(tokenMiddleWare)
 	// todos 관련
 	th := getTodoHandler()
-	wrappedTodoHandler := handler3.NewDecoHandler(th, checkFunc)
-	r.PathPrefix("/todos").Handler(wrappedTodoHandler)
-
+	//wrappedTodoHandler := handler3.NewDecoHandler(th, checkFunc)
+	s.PathPrefix("/todos").Handler(th)
+	cH := getCafeHandler()
+	s.PathPrefix("/cafes").Handler(cH)
 	return r
+}
+
+func tokenMiddleWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authMiddle := handler3.NewAuthMiddleware(jwt.NewProvider("this_is_my_jwt_token_secret_key"))
+		authMiddle.CheckToken(w, r, next)
+	})
 }
 
 func getTokenCheckFunc(p jwt.Provider) func(http.ResponseWriter, *http.Request, http.Handler) {
 	am := handler3.NewAuthMiddleware(p)
 	return am.CheckToken
+}
+
+func getCafeHandler() http.Handler {
+	return cafe.NewHandler(cafe2.NewController(cafe3.NewService(cafe4.NewRequester())))
 }
 
 func getUserHandler(p jwt.Provider) http.Handler {

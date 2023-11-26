@@ -2,7 +2,7 @@ package todo
 
 import (
 	"apiGateway/internal/cli/todo"
-	"apiGateway/internal/domain"
+	todo2 "apiGateway/internal/domain/todo"
 	page2 "apiGateway/internal/page"
 	"context"
 )
@@ -15,21 +15,21 @@ func NewService(tr todo.TodoRequester) Service {
 	return Service{tr: tr}
 }
 
-func (s Service) CreateTodo(ctx context.Context, td domain.Todo) error {
+func (s Service) CreateTodo(ctx context.Context, td todo2.Todo) error {
 	err := s.tr.CreateTodo(ctx, td)
 	return err
 }
 
-func (s Service) GetTodoList(ctx context.Context, reqPage page2.ReqPage) ([]domain.Todo, int, error) {
+func (s Service) GetTodoList(ctx context.Context, reqPage page2.ReqPage) ([]todo2.Todo, int, error) {
 	return s.tr.GetTodoList(ctx, reqPage)
 }
 
-func (s Service) GetTodoDetail(ctx context.Context, id int) (domain.Todo, error) {
+func (s Service) GetTodoDetail(ctx context.Context, id int) (todo2.Todo, error) {
 	resTodoDomain, err := s.tr.GetTodoDetail(ctx, id)
 	return resTodoDomain, err
 }
 
-func (s Service) UpdateTodo(ctx context.Context, td domain.Todo) error {
+func (s Service) UpdateTodo(ctx context.Context, td todo2.Todo) error {
 	err := s.tr.UpdateTodo(ctx, td)
 	return err
 }

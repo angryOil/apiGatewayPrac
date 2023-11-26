@@ -27,7 +27,7 @@ type AuthTokenClaims struct {
 func (p Provider) CreateToken(u user.User) (string, error) {
 	v := u.ToInfo()
 	at := AuthTokenClaims{
-		UserId: v.Id,
+		UserId: v.UserId,
 		Email:  v.Email,
 		Role:   v.Role,
 		StandardClaims: jwt.StandardClaims{

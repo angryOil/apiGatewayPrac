@@ -65,6 +65,7 @@ func (ur UserRequester) CreateUser(ctx context.Context, c CreateUser) error {
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
+		log.Println("CreateUser defaultClient.Do err: ", err)
 		return errors.New(InternalServerError)
 	}
 	defer resp.Body.Close()
