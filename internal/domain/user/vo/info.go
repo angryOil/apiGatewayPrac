@@ -1,7 +1,7 @@
 package vo
 
 type Info struct {
-	Id       int
+	UserId   int `json:"user_id"`
 	Email    string
 	Password string
 	Role     []string

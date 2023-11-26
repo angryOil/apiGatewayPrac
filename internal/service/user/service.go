@@ -3,6 +3,7 @@ package user
 import (
 	req2 "apiGateway/internal/cli/user/req"
 	"apiGateway/internal/domain/user"
+	"apiGateway/internal/domain/user/vo"
 	"apiGateway/internal/jwt"
 	"apiGateway/internal/service/user/req"
 	"context"
@@ -51,7 +52,6 @@ func (s Service) Login(ctx context.Context, l req.Login) (string, error) {
 func tokenToDomain(token string) (user.User, error) {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
-		//
 		log.Printf("로그인 결과가 토큰이아닙니다. token:%s ", token)
 		return user.NewBuilder().Build(), errors.New(InternalServerError)
 	}
@@ -64,12 +64,17 @@ func payloadToDomain(payload string) (user.User, error) {
 	if err != nil {
 		return user.NewBuilder().Build(), err
 	}
-	var u user.User
-	err = json.Unmarshal(data, &u)
+	var i vo.Info
+	err = json.Unmarshal(data, &i)
 	if err != nil {
 		return user.NewBuilder().Build(), err
 	}
-	return u, nil
+
+	return user.NewBuilder().
+		Id(i.UserId).
+		Email(i.Email).
+		Role(i.Role).
+		Build(), nil
 }
 
 func (s Service) CreateUser(ctx context.Context, c req.CreateUser) error {

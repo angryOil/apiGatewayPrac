@@ -3,6 +3,7 @@ package handler
 import (
 	"apiGateway/internal/jwt"
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -15,6 +16,11 @@ type AuthMiddleware struct {
 func NewAuthMiddleware(p jwt.Provider) AuthMiddleware {
 	return AuthMiddleware{p: p}
 }
+
+const (
+	InternalServerError = "internal server error"
+	InvalidToken        = "invalid token"
+)
 
 func (a AuthMiddleware) CheckToken(w http.ResponseWriter, r *http.Request, h http.Handler) {
 	token := r.Header.Get("token")
@@ -45,6 +51,26 @@ func (a AuthMiddleware) CheckToken(w http.ResponseWriter, r *http.Request, h htt
 	// ctx 에 token 추가
 	ctx := ContextWithToken(r.Context(), token)
 	h.ServeHTTP(w, r.WithContext(ctx))
+}
+
+func (a AuthMiddleware) GetValidTokenFromRequest(r *http.Request) (string, error) {
+	token := r.Header.Get("token")
+	if !tokenCheck(token) {
+		return "", errors.New(InvalidToken)
+	}
+
+	result, err := a.p.ValidToken(token)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") || strings.Contains(err.Error(), "expired") {
+			return "", err
+		}
+		log.Println(err)
+		return "", errors.New(InternalServerError)
+	}
+	if !result {
+		return "", err
+	}
+	return token, nil
 }
 
 func tokenCheck(token string) bool {

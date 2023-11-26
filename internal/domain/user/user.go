@@ -45,7 +45,7 @@ func (u *user) ValidCreateUser() error {
 
 func (u *user) ToInfo() vo.Info {
 	return vo.Info{
-		Id:       u.id,
+		UserId:   u.id,
 		Email:    u.email,
 		Password: u.password,
 		Role:     u.role,
