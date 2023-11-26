@@ -12,6 +12,11 @@ type Handler struct {
 
 func NewHandler(c cafe.Controller) http.Handler {
 	r := mux.NewRouter()
-	//h := Handler{c: c}
+	h := Handler{c: c}
+	r.HandleFunc("/cafes", h.create).Methods(http.MethodPost)
 	return r
+}
+
+func (h Handler) create(w http.ResponseWriter, r *http.Request) {
+
 }
