@@ -1,12 +1,16 @@
 package cafe
 
 import (
+	"apiGateway/internal/cli/cafe/model"
 	req2 "apiGateway/internal/cli/cafe/req"
+	"apiGateway/internal/domain/cafe"
+	page2 "apiGateway/internal/page"
 	"apiGateway/internal/service/common"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -60,4 +64,32 @@ func (r Requester) Create(ctx context.Context, c req2.Create) error {
 		return errors.New(string(readBody))
 	}
 	return nil
+}
+
+func (r Requester) GetList(ctx context.Context, reqPage page2.ReqPage) ([]cafe.Cafe, int, error) {
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return []cafe.Cafe{}, 0, errors.New(InvalidToken)
+	}
+	reqUrl := fmt.Sprintf("%s?page=%d&size=%d", baseUrl, reqPage.Page, reqPage.Size)
+	re, err := http.NewRequest("GET", reqUrl, nil)
+	if err != nil {
+		log.Println("GetList NewRequest err: ", err)
+		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+	}
+	re.Header.Add("token", token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("GetList DefaultClient err: ", err)
+		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+	}
+	var cafePage model.CafePage
+	err = json.NewDecoder(resp.Body).Decode(&cafePage)
+	if err != nil {
+		log.Println("GetList NewDecoder err: ", err)
+		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+	}
+
+	return model.ToDomainList(cafePage.Contents), cafePage.Total, nil
 }
