@@ -6,6 +6,7 @@ import (
 	"apiGateway/internal/controller/cafe/req"
 	cafe2 "apiGateway/internal/domain/cafe"
 	page2 "apiGateway/internal/page"
+	req3 "apiGateway/internal/service/cafe/req"
 	"apiGateway/internal/service/cafe/res"
 	"context"
 )
@@ -49,4 +50,37 @@ func (s Service) GetList(ctx context.Context, reqPage page2.ReqPage) ([]res.GetC
 		}
 	}
 	return dto, cnt, nil
+}
+
+func (s Service) GetDetail(ctx context.Context, id int) (res.GetDetail, error) {
+	d, err := s.r.GetDetail(ctx, id)
+	if err != nil {
+		return res.GetDetail{}, err
+	}
+	v := d.ToDetail()
+	return res.GetDetail{
+		Id:          v.Id,
+		Name:        v.Name,
+		Description: v.Description,
+	}, nil
+}
+
+func (s Service) Patch(ctx context.Context, p req3.Patch) error {
+	id := p.Id
+	name, description := p.Name, p.Description
+
+	err := cafe2.NewCafeBuilder().
+		Id(id).
+		Name(name).
+		Description(description).
+		Build().ValidUpdate()
+	if err != nil {
+		return err
+	}
+	err = s.r.Patch(ctx, req2.Patch{
+		Id:          id,
+		Name:        name,
+		Description: description,
+	})
+	return err
 }
