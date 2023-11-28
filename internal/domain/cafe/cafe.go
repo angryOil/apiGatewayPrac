@@ -11,6 +11,7 @@ var _ Cafe = (*cafe)(nil)
 type Cafe interface {
 	ValidCafeFiled() error
 	ValidCreate() error
+	ValidUpdate() error
 	Update(name, description string) Cafe
 	VerifyUpdate() error
 	GetOwnerId() int
@@ -92,6 +93,16 @@ const (
 	NotVerifyOwnerId  = "owner id is zero"
 	NotVerifyCafeName = "cafe name is empty"
 )
+
+func (c *cafe) ValidUpdate() error {
+	if c.id < 1 {
+		return errors.New(NotVerifyId)
+	}
+	if c.name == "" {
+		return errors.New(NotVerifyCafeName)
+	}
+	return nil
+}
 
 func (c *cafe) VerifyUpdate() error {
 	if c.id < 1 {
