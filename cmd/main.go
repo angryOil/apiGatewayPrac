@@ -1,18 +1,22 @@
 package main
 
 import (
-	"apiGateway/cmd/app/handler/cafe"
+	"apiGateway/cmd/app/handler/cafe/cafe"
+	"apiGateway/cmd/app/handler/cafe/member"
 	"apiGateway/cmd/app/handler/todo"
 	"apiGateway/cmd/app/handler/user"
-	cafe4 "apiGateway/internal/cli/cafe"
+	cafe4 "apiGateway/internal/cli/cafe/cafe"
+	member4 "apiGateway/internal/cli/cafe/member"
 	todo4 "apiGateway/internal/cli/todo"
 	"apiGateway/internal/cli/user/req"
-	cafe2 "apiGateway/internal/controller/cafe"
+	cafe2 "apiGateway/internal/controller/cafe/cafe"
+	member2 "apiGateway/internal/controller/cafe/member"
 	todo2 "apiGateway/internal/controller/todo"
 	user2 "apiGateway/internal/controller/user"
 	handler3 "apiGateway/internal/deco/handler"
 	"apiGateway/internal/jwt"
-	cafe3 "apiGateway/internal/service/cafe"
+	cafe3 "apiGateway/internal/service/cafe/cafe"
+	member3 "apiGateway/internal/service/cafe/member"
 	todo3 "apiGateway/internal/service/todo"
 	user3 "apiGateway/internal/service/user"
 	"github.com/gorilla/mux"
@@ -41,8 +45,7 @@ func getHandler() http.Handler {
 	th := getTodoHandler()
 	//wrappedTodoHandler := handler3.NewDecoHandler(th, checkFunc)
 	s.PathPrefix("/todos").Handler(th)
-	cH := getCafeHandler()
-	s.PathPrefix("/cafes").Handler(cH)
+	registrationCafeHandler(s)
 	return r
 }
 
@@ -53,13 +56,16 @@ func tokenMiddleWare(next http.Handler) http.Handler {
 	})
 }
 
-func getTokenCheckFunc(p jwt.Provider) func(http.ResponseWriter, *http.Request, http.Handler) {
-	am := handler3.NewAuthMiddleware(p)
-	return am.CheckToken
+func getMemberHandler() http.Handler {
+	return member.NewHandler(member2.NewController(member3.NewService(member4.NewRequester())))
 }
 
-func getCafeHandler() http.Handler {
-	return cafe.NewHandler(cafe2.NewController(cafe3.NewService(cafe4.NewRequester())))
+func registrationCafeHandler(r *mux.Router) {
+	memberH := getMemberHandler()
+	r.PathPrefix("/cafes/members").Handler(memberH)
+	r.PathPrefix("/cafes/{cafeId:[0-9]+}/members").Handler(memberH)
+
+	r.PathPrefix("/cafes").Handler(cafe.NewHandler(cafe2.NewController(cafe3.NewService(cafe4.NewRequester()))))
 }
 
 func getUserHandler(p jwt.Provider) http.Handler {

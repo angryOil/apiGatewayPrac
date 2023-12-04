@@ -1,7 +1,7 @@
 package cafe
 
 import (
-	"apiGateway/internal/domain/cafe/vo"
+	vo2 "apiGateway/internal/domain/cafe/cafe/vo"
 	"errors"
 	"time"
 )
@@ -16,9 +16,9 @@ type Cafe interface {
 	VerifyUpdate() error
 	GetOwnerId() int
 
-	ToDetail() vo.Detail
-	ToCafeListInfo() vo.CafeListInfo
-	UpdateCafeInfo() vo.UpdateCafe
+	ToDetail() vo2.Detail
+	ToCafeListInfo() vo2.CafeListInfo
+	UpdateCafeInfo() vo2.UpdateCafe
 }
 
 type cafe struct {
@@ -29,8 +29,8 @@ type cafe struct {
 	createdAt   time.Time
 }
 
-func (c *cafe) UpdateCafeInfo() vo.UpdateCafe {
-	return vo.UpdateCafe{
+func (c *cafe) UpdateCafeInfo() vo2.UpdateCafe {
+	return vo2.UpdateCafe{
 		Id:          c.id,
 		OwnerId:     c.ownerId,
 		Name:        c.name,
@@ -39,15 +39,15 @@ func (c *cafe) UpdateCafeInfo() vo.UpdateCafe {
 	}
 }
 
-func (c *cafe) ToCafeListInfo() vo.CafeListInfo {
-	return vo.CafeListInfo{
+func (c *cafe) ToCafeListInfo() vo2.CafeListInfo {
+	return vo2.CafeListInfo{
 		Id:   c.id,
 		Name: c.name,
 	}
 }
 
-func (c *cafe) ToDetail() vo.Detail {
-	return vo.Detail{
+func (c *cafe) ToDetail() vo2.Detail {
+	return vo2.Detail{
 		Id:          c.id,
 		Name:        c.name,
 		Description: c.description,

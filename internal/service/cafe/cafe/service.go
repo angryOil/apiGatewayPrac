@@ -1,13 +1,13 @@
 package cafe
 
 import (
-	"apiGateway/internal/cli/cafe"
-	req2 "apiGateway/internal/cli/cafe/req"
-	"apiGateway/internal/controller/cafe/req"
-	cafe2 "apiGateway/internal/domain/cafe"
+	"apiGateway/internal/cli/cafe/cafe"
+	req4 "apiGateway/internal/cli/cafe/cafe/req"
+	"apiGateway/internal/controller/cafe/cafe/req"
+	cafe2 "apiGateway/internal/domain/cafe/cafe"
 	page2 "apiGateway/internal/page"
-	req3 "apiGateway/internal/service/cafe/req"
-	"apiGateway/internal/service/cafe/res"
+	req3 "apiGateway/internal/service/cafe/cafe/req"
+	res2 "apiGateway/internal/service/cafe/cafe/res"
 	"context"
 )
 
@@ -29,22 +29,22 @@ func (s Service) Create(ctx context.Context, c req.CreateCafeDto) error {
 	if err != nil {
 		return err
 	}
-	err = s.r.Create(ctx, req2.Create{
+	err = s.r.Create(ctx, req4.Create{
 		Name:        name,
 		Description: description,
 	})
 	return err
 }
 
-func (s Service) GetList(ctx context.Context, reqPage page2.ReqPage) ([]res.GetCafes, int, error) {
+func (s Service) GetList(ctx context.Context, reqPage page2.ReqPage) ([]res2.GetCafes, int, error) {
 	domains, cnt, err := s.r.GetList(ctx, reqPage)
 	if err != nil {
-		return []res.GetCafes{}, 0, err
+		return []res2.GetCafes{}, 0, err
 	}
-	dto := make([]res.GetCafes, len(domains))
+	dto := make([]res2.GetCafes, len(domains))
 	for i, d := range domains {
 		v := d.ToCafeListInfo()
-		dto[i] = res.GetCafes{
+		dto[i] = res2.GetCafes{
 			Id:   v.Id,
 			Name: v.Name,
 		}
@@ -52,13 +52,13 @@ func (s Service) GetList(ctx context.Context, reqPage page2.ReqPage) ([]res.GetC
 	return dto, cnt, nil
 }
 
-func (s Service) GetDetail(ctx context.Context, id int) (res.GetDetail, error) {
+func (s Service) GetDetail(ctx context.Context, id int) (res2.GetDetail, error) {
 	d, err := s.r.GetDetail(ctx, id)
 	if err != nil {
-		return res.GetDetail{}, err
+		return res2.GetDetail{}, err
 	}
 	v := d.ToDetail()
-	return res.GetDetail{
+	return res2.GetDetail{
 		Id:          v.Id,
 		Name:        v.Name,
 		Description: v.Description,
@@ -77,7 +77,7 @@ func (s Service) Patch(ctx context.Context, p req3.Patch) error {
 	if err != nil {
 		return err
 	}
-	err = s.r.Patch(ctx, req2.Patch{
+	err = s.r.Patch(ctx, req4.Patch{
 		Id:          id,
 		Name:        name,
 		Description: description,

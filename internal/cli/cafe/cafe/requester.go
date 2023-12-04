@@ -1,9 +1,9 @@
 package cafe
 
 import (
-	"apiGateway/internal/cli/cafe/model"
-	req2 "apiGateway/internal/cli/cafe/req"
-	"apiGateway/internal/domain/cafe"
+	"apiGateway/internal/cli/cafe/cafe/model"
+	"apiGateway/internal/cli/cafe/cafe/req"
+	cafe2 "apiGateway/internal/domain/cafe/cafe"
 	page2 "apiGateway/internal/page"
 	"apiGateway/internal/service/common"
 	"bytes"
@@ -31,7 +31,7 @@ const (
 	InternalServerError = "internal server error"
 )
 
-func (r Requester) Create(ctx context.Context, c req2.Create) error {
+func (r Requester) Create(ctx context.Context, c req.Create) error {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
 		return errors.New(InvalidToken)
@@ -67,71 +67,71 @@ func (r Requester) Create(ctx context.Context, c req2.Create) error {
 	return nil
 }
 
-func (r Requester) GetList(ctx context.Context, reqPage page2.ReqPage) ([]cafe.Cafe, int, error) {
+func (r Requester) GetList(ctx context.Context, reqPage page2.ReqPage) ([]cafe2.Cafe, int, error) {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
-		return []cafe.Cafe{}, 0, errors.New(InvalidToken)
+		return []cafe2.Cafe{}, 0, errors.New(InvalidToken)
 	}
 	reqUrl := fmt.Sprintf("%s?page=%d&size=%d", baseUrl, reqPage.Page, reqPage.Size)
 	re, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
 		log.Println("GetList NewRequest err: ", err)
-		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+		return []cafe2.Cafe{}, 0, errors.New(InternalServerError)
 	}
 	re.Header.Add(Token, token)
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
 		log.Println("GetList DefaultClient err: ", err)
-		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+		return []cafe2.Cafe{}, 0, errors.New(InternalServerError)
 	}
 	var cafePage model.CafePage
 	err = json.NewDecoder(resp.Body).Decode(&cafePage)
 	if err != nil {
 		log.Println("GetList NewDecoder err: ", err)
-		return []cafe.Cafe{}, 0, errors.New(InternalServerError)
+		return []cafe2.Cafe{}, 0, errors.New(InternalServerError)
 	}
 
 	return model.ToDomainList(cafePage.Contents), cafePage.Total, nil
 }
 
-func (r Requester) GetDetail(ctx context.Context, id int) (cafe.Cafe, error) {
+func (r Requester) GetDetail(ctx context.Context, id int) (cafe2.Cafe, error) {
 	token, ok := common.TokenFromContext(ctx)
 	if !ok {
-		return cafe.NewCafeBuilder().Build(), errors.New(InvalidToken)
+		return cafe2.NewCafeBuilder().Build(), errors.New(InvalidToken)
 	}
 	reqUrl := fmt.Sprintf("%s/%d", baseUrl, id)
 	re, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
 		log.Println("GetDetail NewRequest err: ", err)
-		return cafe.NewCafeBuilder().Build(), errors.New(InternalServerError)
+		return cafe2.NewCafeBuilder().Build(), errors.New(InternalServerError)
 	}
 	re.Header.Add(Token, token)
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
 		log.Println("GetDetail DefaultClient.Do err: ", err)
-		return cafe.NewCafeBuilder().Build(), errors.New(InternalServerError)
+		return cafe2.NewCafeBuilder().Build(), errors.New(InternalServerError)
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		readBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("GetDetail readBody err: ", err)
-			return cafe.NewCafeBuilder().Build(), errors.New(InternalServerError)
+			return cafe2.NewCafeBuilder().Build(), errors.New(InternalServerError)
 		}
-		return cafe.NewCafeBuilder().Build(), errors.New(string(readBody))
+		return cafe2.NewCafeBuilder().Build(), errors.New(string(readBody))
 	}
 	var m model.Cafe
 	err = json.NewDecoder(resp.Body).Decode(&m)
 	if err != nil {
 		log.Println("GetDetail NewDecoder err: ", err)
-		return cafe.NewCafeBuilder().Build(), errors.New(InternalServerError)
+		return cafe2.NewCafeBuilder().Build(), errors.New(InternalServerError)
 	}
 	return m.ToDomain(), nil
 }
 
-func (r Requester) Patch(ctx context.Context, p req2.Patch) error {
+func (r Requester) Patch(ctx context.Context, p req.Patch) error {
 	id := p.Id
 	patchDto := p.ToPatchDto()
 	var buf bytes.Buffer
