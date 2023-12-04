@@ -1,8 +1,8 @@
 package cafe
 
 import (
-	"apiGateway/internal/controller/cafe"
-	"apiGateway/internal/controller/cafe/req"
+	"apiGateway/internal/controller/cafe/cafe"
+	req2 "apiGateway/internal/controller/cafe/cafe/req"
 	"apiGateway/internal/page"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -31,7 +31,7 @@ const (
 )
 
 func (h Handler) create(w http.ResponseWriter, r *http.Request) {
-	var c req.CreateCafeDto
+	var c req2.CreateCafeDto
 	err := json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -92,7 +92,7 @@ func (h Handler) patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, InvalidId, http.StatusBadRequest)
 		return
 	}
-	var d req.PatchDto
+	var d req2.PatchDto
 	err = json.NewDecoder(r.Body).Decode(&d)
 	if err != nil {
 		log.Println("patch json.NewDecoder err: ", err)

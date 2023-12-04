@@ -1,6 +1,8 @@
 package model
 
-import "apiGateway/internal/domain/cafe"
+import (
+	cafe2 "apiGateway/internal/domain/cafe/cafe"
+)
 
 type Cafe struct {
 	Id          int    `json:"id"`
@@ -8,16 +10,16 @@ type Cafe struct {
 	Description string `json:"description"`
 }
 
-func (c Cafe) ToDomain() cafe.Cafe {
-	return cafe.NewCafeBuilder().
+func (c Cafe) ToDomain() cafe2.Cafe {
+	return cafe2.NewCafeBuilder().
 		Id(c.Id).
 		Name(c.Name).
 		Description(c.Description).
 		Build()
 }
 
-func ToDomainList(list []Cafe) []cafe.Cafe {
-	domains := make([]cafe.Cafe, len(list))
+func ToDomainList(list []Cafe) []cafe2.Cafe {
+	domains := make([]cafe2.Cafe, len(list))
 	for i, l := range list {
 		domains[i] = l.ToDomain()
 	}
