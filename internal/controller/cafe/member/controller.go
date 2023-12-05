@@ -29,3 +29,16 @@ func (c Controller) GetMyCafeList(ctx context.Context, reqPage page2.ReqPage) ([
 	}
 	return dto, total, nil
 }
+
+func (c Controller) GetMemberInfo(ctx context.Context, cafeId int) (res.MemberInfoDto, error) {
+	info, err := c.s.GetMemberInfo(ctx, cafeId)
+	if err != nil {
+		return res.MemberInfoDto{}, err
+	}
+	return res.MemberInfoDto{
+		Id:        info.Id,
+		UserId:    info.UserId,
+		Nickname:  info.Nickname,
+		CreatedAt: info.CreatedAt,
+	}, nil
+}
