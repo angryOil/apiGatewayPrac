@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -18,6 +19,7 @@ func NewHandler(c member.Controller) http.Handler {
 	r := mux.NewRouter()
 	h := Handler{c: c}
 	r.HandleFunc("/cafes/members/my", h.getMyCafeList).Methods(http.MethodGet)
+	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/info", h.getMemberInfo).Methods(http.MethodGet)
 	return r
 }
 
@@ -40,6 +42,28 @@ func (h Handler) getMyCafeList(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(listTotalDto)
 	if err != nil {
 		log.Println("getMyCafeList json.Marshal err: ", err)
+		http.Error(w, InternalServerError, http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("Content-Type", ApplicationJson)
+	w.Write(data)
+}
+
+func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
+		return
+	}
+	dto, err := h.c.GetMemberInfo(r.Context(), cafeId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(dto)
+	if err != nil {
+		log.Println("getMemberInfo json.Marshal err: ", err)
 		http.Error(w, InternalServerError, http.StatusInternalServerError)
 		return
 	}

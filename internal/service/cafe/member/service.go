@@ -3,6 +3,7 @@ package member
 import (
 	"apiGateway/internal/cli/cafe/member"
 	page2 "apiGateway/internal/page"
+	res2 "apiGateway/internal/service/cafe/cafe/res"
 	"apiGateway/internal/service/cafe/member/res"
 	"context"
 )
@@ -28,4 +29,18 @@ func (s Service) GetMyCafeList(ctx context.Context, reqPage page2.ReqPage) ([]re
 		}
 	}
 	return dto, total, nil
+}
+
+func (s Service) GetMemberInfo(ctx context.Context, cafeId int) (res2.GetMemberInfo, error) {
+	d, err := s.r.GetMemberInfo(ctx, cafeId)
+	if err != nil {
+		return res2.GetMemberInfo{}, err
+	}
+	v := d.ToInfo()
+	return res2.GetMemberInfo{
+		Id:        v.Id,
+		UserId:    v.UserId,
+		Nickname:  v.Nickname,
+		CreatedAt: v.CreatedAt,
+	}, nil
 }
