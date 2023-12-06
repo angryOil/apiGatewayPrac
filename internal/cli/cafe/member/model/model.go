@@ -27,3 +27,7 @@ type MyCafeListTotalDto struct {
 	Contents []MyCafeListDto `json:"contents"`
 	Total    int             `json:"total"`
 }
+
+type JoinCafe struct {
+	Nickname string `json:"nickname"`
+}

@@ -35,9 +35,6 @@ func (m *member) ValidCreate() error {
 	if m.nickname == "" {
 		return errors.New(InvalidNickname)
 	}
-	if m.userId < 1 {
-		return errors.New(InvalidUserId)
-	}
 	if m.cafeId < 1 {
 		return errors.New(InvalidCafeId)
 	}

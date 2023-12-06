@@ -2,9 +2,11 @@ package member
 
 import (
 	"apiGateway/internal/cli/cafe/member/model"
+	"apiGateway/internal/cli/cafe/member/req"
 	"apiGateway/internal/domain/cafe/member"
 	page2 "apiGateway/internal/page"
 	"apiGateway/internal/service/common"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -105,4 +107,43 @@ func (r Requester) GetMemberInfo(ctx context.Context, cafeId int) (member.Member
 		return member.NewMemberBuilder().Build(), errors.New(InternalServerError)
 	}
 	return m.ToDomain(), nil
+}
+
+func (r Requester) JoinCafe(ctx context.Context, c req.JoinCafe) error {
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return errors.New(InvalidToken)
+	}
+	reqUrl := fmt.Sprintf("%s/%d/%s/join", baseUrl, c.CafeId, Members)
+	dto := model.JoinCafe{Nickname: c.NickName}
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(dto)
+	if err != nil {
+		log.Println("JoinCafe json.NewDecoder err: ", err)
+		return errors.New(InternalServerError)
+	}
+	re, err := http.NewRequest("POST", reqUrl, &buf)
+	if err != nil {
+		log.Println("JoinCafe NewRequest err: ", err)
+		return errors.New(InternalServerError)
+	}
+	re.Header.Add(Token, token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("JoinCafe DefaultClient err: ", err)
+		return errors.New(InternalServerError)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		readBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("JoinCafe readBody err: ", err)
+			return errors.New(InternalServerError)
+		}
+		return errors.New(string(readBody))
+	}
+
+	return nil
 }
