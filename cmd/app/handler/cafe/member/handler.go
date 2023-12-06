@@ -2,6 +2,7 @@ package member
 
 import (
 	"apiGateway/internal/controller/cafe/member"
+	"apiGateway/internal/controller/cafe/member/req"
 	"apiGateway/internal/controller/cafe/member/res"
 	"apiGateway/internal/page"
 	"encoding/json"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Handler struct {
@@ -20,6 +22,7 @@ func NewHandler(c member.Controller) http.Handler {
 	h := Handler{c: c}
 	r.HandleFunc("/cafes/members/my", h.getMyCafeList).Methods(http.MethodGet)
 	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/info", h.getMemberInfo).Methods(http.MethodGet)
+	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/join", h.joinCafe).Methods(http.MethodPost)
 	return r
 }
 
@@ -69,4 +72,32 @@ func (h Handler) getMemberInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", ApplicationJson)
 	w.Write(data)
+}
+
+func (h Handler) joinCafe(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
+		return
+	}
+
+	var joinDto req.JoinCafe
+	err = json.NewDecoder(r.Body).Decode(&joinDto)
+	if err != nil {
+		log.Println("joinCafe json.NewDecoder err: ", err)
+		http.Error(w, InternalServerError, http.StatusBadRequest)
+		return
+	}
+	err = h.c.JoinCafe(r.Context(), cafeId, joinDto)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate") {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }

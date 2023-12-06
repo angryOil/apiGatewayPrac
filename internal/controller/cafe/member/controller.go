@@ -1,9 +1,11 @@
 package member
 
 import (
+	"apiGateway/internal/controller/cafe/member/req"
 	"apiGateway/internal/controller/cafe/member/res"
 	page2 "apiGateway/internal/page"
 	"apiGateway/internal/service/cafe/member"
+	req2 "apiGateway/internal/service/cafe/member/req"
 	"context"
 )
 
@@ -41,4 +43,12 @@ func (c Controller) GetMemberInfo(ctx context.Context, cafeId int) (res.MemberIn
 		Nickname:  info.Nickname,
 		CreatedAt: info.CreatedAt,
 	}, nil
+}
+
+func (c Controller) JoinCafe(ctx context.Context, cafeId int, dto req.JoinCafe) error {
+	err := c.s.JoinCafe(ctx, req2.JoinCafe{
+		CafeId:   cafeId,
+		NickName: dto.Nickname,
+	})
+	return err
 }
