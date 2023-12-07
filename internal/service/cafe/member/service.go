@@ -64,3 +64,23 @@ func (s Service) JoinCafe(ctx context.Context, c req2.JoinCafe) error {
 	})
 	return err
 }
+
+func (s Service) PatchMember(ctx context.Context, p req2.PatchMember) error {
+	cafeId := p.CafeId
+	memberId := p.MemberId
+	nickname := p.Nickname
+	err := member2.NewMemberBuilder().
+		CafeId(cafeId).
+		Id(memberId).
+		Nickname(nickname).
+		Build().ValidUpdate()
+	if err != nil {
+		return err
+	}
+	err = s.r.PatchMember(ctx, req.PatchMember{
+		CafeId:   cafeId,
+		MemberId: memberId,
+		Nickname: nickname,
+	})
+	return err
+}

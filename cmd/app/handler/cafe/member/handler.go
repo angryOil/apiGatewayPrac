@@ -23,11 +23,13 @@ func NewHandler(c member.Controller) http.Handler {
 	r.HandleFunc("/cafes/members/my", h.getMyCafeList).Methods(http.MethodGet)
 	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/info", h.getMemberInfo).Methods(http.MethodGet)
 	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/join", h.joinCafe).Methods(http.MethodPost)
+	r.HandleFunc("/cafes/{cafeId:[0-9]+}/members/{memberId:[0-9]+}", h.patchMember).Methods(http.MethodPatch)
 	return r
 }
 
 const (
 	InvalidCafeId       = "invalid cafe id"
+	InvalidMemberId     = "invalid member id"
 	InternalServerError = "internal server error"
 	ApplicationJson     = "application/json"
 )
@@ -100,4 +102,38 @@ func (h Handler) joinCafe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (h Handler) patchMember(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	cafeId, err := strconv.Atoi(vars["cafeId"])
+	if err != nil {
+		http.Error(w, InvalidCafeId, http.StatusBadRequest)
+		return
+	}
+	memberId, err := strconv.Atoi(vars["memberId"])
+	if err != nil {
+		http.Error(w, InvalidMemberId, http.StatusBadRequest)
+		return
+	}
+	var dto req.PatchMemberDto
+	err = json.NewDecoder(r.Body).Decode(&dto)
+
+	err = h.c.PatchMember(r.Context(), cafeId, memberId, dto)
+	if err != nil {
+		if strings.Contains(err.Error(), "no row") {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		if strings.Contains(err.Error(), "invalid") {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if strings.Contains(err.Error(), "duplicate") {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
