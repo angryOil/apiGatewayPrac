@@ -52,3 +52,12 @@ func (c Controller) JoinCafe(ctx context.Context, cafeId int, dto req.JoinCafe) 
 	})
 	return err
 }
+
+func (c Controller) PatchMember(ctx context.Context, cafeId int, memberId int, dto req.PatchMemberDto) error {
+	err := c.s.PatchMember(ctx, req2.PatchMember{
+		CafeId:   cafeId,
+		MemberId: memberId,
+		Nickname: dto.Nickname,
+	})
+	return err
+}

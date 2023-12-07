@@ -147,3 +147,36 @@ func (r Requester) JoinCafe(ctx context.Context, c req.JoinCafe) error {
 
 	return nil
 }
+
+func (r Requester) PatchMember(ctx context.Context, p req.PatchMember) error {
+	reUrl := fmt.Sprintf("%s/%d/%s/%d", baseUrl, p.CafeId, Members, p.MemberId)
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(p.ToDto())
+	if err != nil {
+		log.Println("PatchMember json.NewEncode err: ", err)
+		return errors.New(InternalServerError)
+	}
+
+	re, err := http.NewRequest("PATCH", reUrl, &buf)
+	token, ok := common.TokenFromContext(ctx)
+	if !ok {
+		return errors.New(InvalidToken)
+	}
+	re.Header.Add(Token, token)
+
+	resp, err := http.DefaultClient.Do(re)
+	if err != nil {
+		log.Println("PatchMember DefaultClient do err: ", err)
+		return errors.New(InternalServerError)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		readBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("PatchMember readBody err: ", err)
+			return errors.New(InternalServerError)
+		}
+		return errors.New(string(readBody))
+	}
+	return nil
+}
