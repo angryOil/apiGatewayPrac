@@ -1,7 +1,7 @@
 package req
 
 import (
-	"apiGateway/internal/domain"
+	"apiGateway/internal/domain/todo"
 	"time"
 )
 
@@ -11,8 +11,8 @@ type CreateTodoDto struct {
 	OrderNum int    `json:"order_num" example:"2"`
 }
 
-func (d CreateTodoDto) ToDomain() domain.Todo {
-	return domain.Todo{
+func (d CreateTodoDto) ToDomain() todo.Todo {
+	return todo.Todo{
 		Title:    d.Title,
 		Content:  d.Content,
 		OrderNum: d.OrderNum,
@@ -26,8 +26,8 @@ type UpdateTodoDto struct {
 	IsDeleted bool   `json:"is_done" example:"false"`
 }
 
-func (d UpdateTodoDto) ToDomain(todoId int) domain.Todo {
-	return domain.Todo{
+func (d UpdateTodoDto) ToDomain(todoId int) todo.Todo {
+	return todo.Todo{
 		Id:            todoId,
 		Title:         d.Title,
 		Content:       d.Content,

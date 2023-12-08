@@ -1,7 +1,7 @@
 package res
 
 import (
-	"apiGateway/internal/domain"
+	"apiGateway/internal/domain/todo"
 	"time"
 )
 
@@ -13,7 +13,7 @@ type ListDto struct {
 	IsDeleted bool   `json:"is_done"`
 }
 
-func ToListDtoList(todos []domain.Todo) []ListDto {
+func ToListDtoList(todos []todo.Todo) []ListDto {
 	listDto := make([]ListDto, len(todos))
 	for i, todo := range todos {
 		listDto[i] = ToListDto(todo)
@@ -21,7 +21,7 @@ func ToListDtoList(todos []domain.Todo) []ListDto {
 	return listDto
 }
 
-func ToListDto(todo domain.Todo) ListDto {
+func ToListDto(todo todo.Todo) ListDto {
 	return ListDto{
 		Id:        todo.Id,
 		Title:     todo.Title,
@@ -41,7 +41,7 @@ type DetailDto struct {
 	IsDeleted bool   `json:"is_done,omitempty"`
 }
 
-func ToDetailDto(todo domain.Todo) DetailDto {
+func ToDetailDto(todo todo.Todo) DetailDto {
 	return DetailDto{
 		Id:        todo.Id,
 		UserId:    todo.UserId,

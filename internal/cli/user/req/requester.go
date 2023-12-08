@@ -1,7 +1,6 @@
-package cli
+package req
 
 import (
-	"apiGateway/internal/domain"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -20,8 +19,14 @@ func NewUserRequester(loginUrl string, createUrl string) UserRequester {
 	return UserRequester{loginUrl: loginUrl, userCreateUrl: createUrl}
 }
 
-func (ur UserRequester) Login(cxt context.Context, u domain.User) (string, error) {
-	data, err := json.Marshal(u)
+const (
+	InternalServerError = "internal server error"
+	LoginFail           = "login fail"
+)
+
+func (ur UserRequester) Login(cxt context.Context, l Login) (string, error) {
+	dto := l.ToLoginDto()
+	data, err := json.Marshal(dto)
 	if err != nil {
 		return "", err
 	}
@@ -39,13 +44,14 @@ func (ur UserRequester) Login(cxt context.Context, u domain.User) (string, error
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("login fail")
+		return "", errors.New(LoginFail)
 	}
 	return string(readBody), nil
 }
 
-func (ur UserRequester) CreateUser(ctx context.Context, u domain.User) error {
-	data, err := json.Marshal(u)
+func (ur UserRequester) CreateUser(ctx context.Context, c CreateUser) error {
+	dto := c.ToCreateUserDto()
+	data, err := json.Marshal(dto)
 	if err != nil {
 
 		return err
@@ -54,25 +60,20 @@ func (ur UserRequester) CreateUser(ctx context.Context, u domain.User) error {
 	re, err := http.NewRequest("POST", ur.userCreateUrl, bytes.NewReader(data))
 	if err != nil {
 		log.Println(err)
-		return errors.New("internal server error")
+		return errors.New(InternalServerError)
 	}
 
 	resp, err := http.DefaultClient.Do(re)
 	if err != nil {
-		return errors.New("internal server error")
+		log.Println("CreateUser defaultClient.Do err: ", err)
+		return errors.New(InternalServerError)
 	}
 	defer resp.Body.Close()
-	resBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return errors.New("internal server error")
-	}
 	if resp.StatusCode != http.StatusCreated {
-		if resp.StatusCode == http.StatusBadRequest {
-			return errors.New("bad request: " + string(resBody))
-		}
-		if resp.StatusCode == http.StatusConflict {
-			return errors.New("conflict:" + string(resBody))
+		resBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println(err)
+			return errors.New(InternalServerError)
 		}
 		return errors.New(string(resBody))
 	}

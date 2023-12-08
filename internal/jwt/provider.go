@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"apiGateway/internal/domain"
+	"apiGateway/internal/domain/user"
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go/v4"
@@ -24,11 +24,12 @@ type AuthTokenClaims struct {
 	jwt.StandardClaims
 }
 
-func (p Provider) CreateToken(u domain.User) (string, error) {
+func (p Provider) CreateToken(u user.User) (string, error) {
+	v := u.ToInfo()
 	at := AuthTokenClaims{
-		UserId: u.Id,
-		Email:  u.Email,
-		Role:   u.Role,
+		UserId: v.UserId,
+		Email:  v.Email,
+		Role:   v.Role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: jwt.At(time.Now().Add(time.Minute * 30)),
 		},
